@@ -1,0 +1,25 @@
+<form class="form-horizontal">
+  <fieldset>
+    <legend>So you wish to add to the collective dream?</legend>
+    <div class="control-group">
+      <input name="name" type="text" placeholder="name">
+    </div>
+    <div class="control-group">
+      <input name="location" type="text" placeholder="location">
+    </div>
+    <div class="control-group">
+      <label class="checkbox">
+        <input type="checkbox">nightmare?</input>
+      </label>
+    </div>
+    <div class="control-group">
+      <textarea name="lastDream" rows="10" placeholder="your last dream"></textarea>
+    </div>
+    <div class="control-group">
+      <button type="submit" class="btn">dream</button>
+    </div>
+  </fieldset>
+</form>
+<p>
+  {{ '%totalDreams% dreams in the collective conscious.' | interpolate }}
+</p>

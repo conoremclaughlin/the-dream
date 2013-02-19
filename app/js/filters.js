@@ -3,8 +3,8 @@
 /* Filters */
 
 angular.module('myApp.filters', []).
-  filter('interpolate', ['version', function(version) {
+  filter('interpolate', ['totalDreams', function(totalDreams) {
     return function(text) {
-      return String(text).replace(/\%VERSION\%/mg, version);
-    }
+      return String(text).replace(/\%totalDreams\%/mg, totalDreams);
+    };
   }]);

@@ -1,24 +1,38 @@
 <!doctype html>
-<html lang="en" ng-app="myApp">
+<html lang="en" ng-app="MyApp">
 <head>
   <meta charset="utf-8">
-  <title>My AngularJS App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>the dream</title>
   <link rel="stylesheet" href="css/app.css"/>
+  <link rel="stylesheet" href="css/bootstrap.css">
+  <link rel="stylesheet" href="css/bootstrap-responsive.css" >
 </head>
 <body>
-  <ul class="menu">
-    <li><a href="#/view1">view1</a></li>
-    <li><a href="#/view2">view2</a></li>
-  </ul>
-
-  <div ng-view></div>
-
-  <div>Angular seed app: v<span app-version></span></div>
+  <div class="container-fluid">
+    <div class="row-fluid">
+      <nav class="sidebar span2">
+        <span><b>the dream</b></span>
+        <ul class="unstyled">
+          <li><a href="#/dream">enter the dream</a></li>
+          <li><a href="#/add">add to the dream</a></li>
+        </ul> 
+      </nav>
+    
+      <div class="span9" ng-view></div>
+    </div>
+  </div>
 
   <!-- In production use:
   <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.4/angular.min.js"></script>
   -->
   <script src="lib/angular/angular.js"></script>
+  <script src="lib/jquery.min.js"></script>
+  <script src="lib/three.min.js"></script>
+  <script src="lib/physi.js"></script>
+  <script src="lib/dat.gui.min.js"></script>
+  <script src="js/angPhsy.js"></script>
+  <script src="js/angDat.js"></script>
   <script src="js/app.js"></script>
   <script src="js/services.js"></script>
   <script src="js/controllers.js"></script>
