@@ -1,8 +1,10 @@
-var physijs = angular.module('Physijs', []);
+var physijs = angular.module('physijs', []);
 
-physijs.factory('physijs', function() {
+physijs.config(function() {
     Physijs.scripts.worker = 'lib/physijs_worker.js';
     Physijs.scripts.ammo = 'ammo.js';
+});
 
+physijs.factory('Physijs', function() {
     return Physijs;
 });
