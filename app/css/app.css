@@ -1,35 +1,62 @@
 /* app css stylesheet */
 
 body {
-  background-color: #000000;
+  background-color: #ffffff;
 }
 
-.menu {
-  list-style: none;
-  border-bottom: 0.1em solid black;
-  margin-bottom: 2em;
-  padding: 0 0 0.5em;
-  position: fixed;
+a {
+  color: #aaaaaa
+} 
+
+.canvas-frame {
+  position: relative;
 }
 
-.menu:before {
-  content: "[";
+#container {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
-.menu:after {
-  content: "]";
+.crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -16px 0 0 -16px;
+  width: 32px;
+  height: 32px;
 }
 
-.menu > li {
-  display: inline;
+.status {
+  position: absolute;
+  left: 5%;
+  color: #ffffff;
 }
 
-.menu > li:before {
-  content: "|";
-  padding-right: 0.3em;
+#dream-nav {
+  border-right: 2px solid #000000;
 }
 
-.menu > li:nth-child(1):before {
-  content: "";
-  padding: 0;
+.logo {
+  position: absolute;
+  top: 5%;
+  left: 5%
 }
+
+#stats { 
+  position: absolute;
+  bottom: 0px; 
+  right: 0px; 
+}
+
+.bar-tab {
+  position: absolute;
+  right: 33% !important; 
+  left: 33% !important; 
+}
+
+[class*="bar-"] {
+  position: absolute;
+}
+
+.errorMessage { text-align: center; width: 200px; margin: 20px auto; }

@@ -1,26 +1,38 @@
 angular.module('scene', [ 'physijs' ])
 
-    .factory('SceneCoordinator', ['Physijs', function(Physijs) {
+    .factory('scene.SceneCoordinator', ['Physijs', function(Physijs) {
         var scenes = {};
 
-        // name of the scene. Pixar uses scene_number:shot_number,
-        // for example
+        /**
+         * SceneCoordinator is a wrapper for THREE.scene to track
+         * state.
+         *
+         * @param {String} name of the scene. Pixar uses scene_number:shot_number
+         * @param {Object} options for the scene
+         * @param {Function} bootstrap the scene
+         * @returns this
+         */
         var SceneCoordinator = function(name, options, bootstrap) {
             if (arguments.length <= 0) return false;
-            bootstrap = arguments[arguments.length - 1];
-            options = (typeof options === 'object') ? options : {};
             if (scenes[name]) return scenes[name];
 
-            this.scene = options.physijs
-                                ? new Physijs.Scene()
-                                : new THREE.Scene();
+            // TODO: just copy the options properties to this
+            this.worldWidth = options.worldWidth;
+            this.worldDepth = options.worldDepth;
+            this.worldHalfWidth = this.worldWidth ? this.worldWidth / 2 : null;
+            this.worldHalfDepth = this.worldDepth ? this.worldDepth / 2 : null;
 
-            scenes[name] = this.scene;
+            console.log('this: ', this.worldWidth);
 
+            bootstrap = arguments[arguments.length - 1];
+            options = typeof options === 'object' ? options : {};
+            this.animates = [];
+            this.scene = options.physijs ? new Physijs.Scene() : new THREE.Scene();
             if (bootstrap && typeof bootstrap === 'function') {
-                this.changeScene(bootstrapGeometry);
+                this.changeScene(bootstrap);
             }
 
+            scenes[name] = this;
             return this;
         };
 
@@ -28,8 +40,22 @@ angular.module('scene', [ 'physijs' ])
             this.scene.add(obj);
         };
 
+        SceneCoordinator.prototype.remove = function remove(obj) {
+            this.scene.remove(obj);
+        };
+
+        // TODO: switch to event emitter, but whether to use angular or node.js...
+        // hmmm....
+        SceneCoordinator.prototype.addAnimate = function addAnimation(animateFn) {
+            this.animates.push(animateFn);
+        };
+
         SceneCoordinator.prototype.animate = function animate() {
             if (this.scene.simulate) this.scene.simulate();
+            this.animates.forEach(function(animateFn) {
+                // TODO: need to use .call for this's context?
+                animateFn();
+            });
         };
 
         SceneCoordinator.prototype.getScene = function get() {
@@ -37,6 +63,7 @@ angular.module('scene', [ 'physijs' ])
         };
 
         SceneCoordinator.prototype.changeScene = function changeScene() {
+            // TODO: initialize new scene?
             var args = Array.prototype.slice.call(arguments);
             var func = args.shift();
             // add the scene object to the beginning of the arguments
