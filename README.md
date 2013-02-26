@@ -1,7 +1,5 @@
 # the-dream - collective visualized dream journal 
 
-summary
----
 collective visualized dream journal built in angular.js and three.js, creating a frankenmonstrosity.
 
 stuff to do
