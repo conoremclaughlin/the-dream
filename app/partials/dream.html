@@ -1,5 +1,11 @@
-<div id="dream" class="canvas-frame" three-view-port>
-  <p class="status" dat-gui-view>.... now dreaming .... </p>
+<div class="dream-view" ng-model="content">
+  <div id="dream" class="canvas-frame" three-view-port dat-gui-view>
+    <p class="status">.... now dreaming ....</p>
+  </div>
+  
+  <div class="dream-content" ng-show="content.show" dream-content>
+    <blockquote class="dream-quote" ng-include src="content.url"></blockquote>
+    <small>{{ content.title }}</small>
+    <button class="btn pull-right" ng-click="content.show = false">leave the dream</button>
+  </div>
 </div>
-
-

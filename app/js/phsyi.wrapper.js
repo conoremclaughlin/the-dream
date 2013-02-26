@@ -5,6 +5,6 @@ physijs.config(function() {
     Physijs.scripts.ammo = 'ammo.js';
 });
 
-physijs.factory('Physijs', function() {
+physijs.factory('physijs.Physijs', function() {
     return Physijs;
 });

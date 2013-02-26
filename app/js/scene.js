@@ -1,6 +1,6 @@
 angular.module('scene', [ 'physijs' ])
 
-    .factory('scene.SceneCoordinator', ['Physijs', function(Physijs) {
+    .factory('scene.SceneCoordinator', ['physijs.Physijs', function(Physijs) {
         var scenes = {};
 
         /**
@@ -37,6 +37,8 @@ angular.module('scene', [ 'physijs' ])
         };
 
         SceneCoordinator.prototype.add = function add(obj) {
+            var animate = obj.animate || obj.update || obj.tick;
+            if (animate) this.animates.push(animate);
             this.scene.add(obj);
         };
 
@@ -50,11 +52,12 @@ angular.module('scene', [ 'physijs' ])
             this.animates.push(animateFn);
         };
 
-        SceneCoordinator.prototype.animate = function animate() {
-            if (this.scene.simulate) this.scene.simulate();
+        SceneCoordinator.prototype.animate = function animate(renderer, clock) {
+            var scene = this.getScene();
+            if (scene.simulate) scene.simulate();
             this.animates.forEach(function(animateFn) {
-                // TODO: need to use .call for this's context?
-                animateFn();
+                // TODO: need to use .call for context?
+                animateFn(renderer, scene, clock);
             });
         };
 

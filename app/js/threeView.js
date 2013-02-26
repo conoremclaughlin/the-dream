@@ -19,6 +19,7 @@ var threeViewModule = angular.module('threeView', [ 'dat.GUI', 'voxel' ])
 
             // threeViews have three basic components:
             // a WebGL renderer, cameras, and a scene
+            this.createStats = true;
             this.renderCount = 0;
             this.renderer = new THREE.WebGLRenderer();
             // TODO: move a createCamera method to the director
@@ -30,7 +31,15 @@ var threeViewModule = angular.module('threeView', [ 'dat.GUI', 'voxel' ])
             );
             this.name = name;
             this.sceneCoordinator = sceneCoordinator;
-            this.activeAnimationFrames = [];
+            this.activeAnimationFrame = null;
+            if (this.createStats) {
+                this.stats = new Stats();
+                this.stats.domElement.style.position = 'absolute';
+                this.stats.domElement.style.bottom = '0px';
+                this.stats.domElement.style.right = '0px';
+            }
+
+            // TODO: create wrapping 'canvas-frame' div for threeView.port
             this.domElement = this.renderer.domElement;
 
             this.renderer.setSize(
@@ -49,9 +58,13 @@ var threeViewModule = angular.module('threeView', [ 'dat.GUI', 'voxel' ])
         ThreeView.prototype.render = function render() {
             // let angular know we're about to render a scene
             $rootScope.$emit('render', this);
-            this.activeAnimationFrames.push(requestAnimationFrame(this.render));
-            //this.sceneCoordinator.animate();
+            this.activeAnimationFrame = requestAnimationFrame(this.render);
+            this.update();
             this.renderer.render(this.sceneCoordinator.getScene(), this.camera);
+        };
+
+        ThreeView.prototype.update = function update() {
+            this.stats.update();
         };
 
         ThreeView.prototype.setSceneCoordinator = function setSceneCoordinator(sceneCoordinator) {
@@ -67,13 +80,10 @@ var threeViewModule = angular.module('threeView', [ 'dat.GUI', 'voxel' ])
 
             // TODO: find more clever way to change canvas size be dynamic (define size in a wrapping element?)
             this.renderer.setSize( window.innerWidth - 140, window.innerHeight );
-            //this.renderer.setSize( this.domElement.offsetWidth, this.domElement.offsetHeight );
         };
 
         ThreeView.prototype.destroy = function destroy(scope) {
-            this.activeAnimationFrames.forEach(function(frame) {
-                cancelAnimationFrame(frame);
-            });
+            cancelAnimationFrame(this.activeAnimationFrame);
         };
 
         return ThreeView;
@@ -88,11 +98,18 @@ var threeViewModule = angular.module('threeView', [ 'dat.GUI', 'voxel' ])
 
             scope.$on('$destroy', function() {
                 scope.threeView.destroy();
+                scope.threeView.stats.end();
             });
             scope.threeView.handleResize();
-            element.append(scope.threeView.renderer.domElement);
+            element.append(scope.threeView.domElement);
+
+            if (scope.threeView.stats) {
+                element.append(scope.threeView.stats.domElement);
+                scope.threeView.stats.begin();
+            }
 
             pointerLock(scope.threeView.renderer.domElement);
+
             scope.threeView.render();
         };
     }])

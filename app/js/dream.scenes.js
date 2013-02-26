@@ -1,6 +1,6 @@
-angular.module('dreamScenes', [ 'scene', 'effects' ])
+angular.module('dream.scenes', [ 'scene', 'effects' ])
 
-    .factory('dreamScenes.Circle', [ '$timeout', 'scene.SceneCoordinator', 'effects.effects', function($timeout, SceneCoordinator, effects) {
+    .factory('dream.scenes.Circle', [ '$timeout', 'scene.SceneCoordinator', 'effects.effects', function($timeout, SceneCoordinator, effects) {
         var Circle = function circle(scene) {
             SceneCoordinator.call(this, 'circle', {
                 physijs: true,
@@ -78,7 +78,7 @@ angular.module('dreamScenes', [ 'scene', 'effects' ])
 
             //effects.addLensFlare( 0.995, 0.025, 0.99, 0, 900, -150 );
 
-            scene.fog = new THREE.FogExp2( 0xffffff, 0.00015 );
+            scene.fog = new THREE.FogExp2( 0x000000, 0.00015 );
 
             // sides
             var light = new THREE.Color( 0xffffff );
@@ -214,12 +214,12 @@ angular.module('dreamScenes', [ 'scene', 'effects' ])
             scene.add( mesh );
              */
 
-            var ambientLight = new THREE.AmbientLight( 0xcccccc );
+            var ambientLight = new THREE.AmbientLight( 0xaaaaaa );
             scene.add( ambientLight );
 
             var directionalLight = new THREE.DirectionalLight( 0xffffff, 2 );
             directionalLight.position.set( 1, 1, 0.5 ).normalize();
-            scene.add( directionalLight );
+            //scene.add( directionalLight );
 
             var sphereMaterial = new THREE.MeshLambertMaterial({
                 color: 0xffffff
@@ -239,7 +239,7 @@ angular.module('dreamScenes', [ 'scene', 'effects' ])
             );
 
             // add the sphere to the scene
-            scene.add(sphere);
+            //scene.add(sphere);
 
             // create a point light
             var pointLight = new THREE.PointLight(0xFFFFFF);
@@ -250,7 +250,7 @@ angular.module('dreamScenes', [ 'scene', 'effects' ])
             pointLight.position.z = 130;
 
             // add to the scene
-            scene.add(pointLight);
+            // scene.add(pointLight);
 
             // Box
             var box = new Physijs.BoxMesh(
@@ -264,8 +264,8 @@ angular.module('dreamScenes', [ 'scene', 'effects' ])
                 new THREE.MeshBasicMaterial({ color: 0xffffff })
             );
 
-            scene.add(box);
-            scene.add(boxTwo);
+            //scene.add(box);
+            //scene.add(boxTwo);
 
 
 

@@ -1,12 +1,12 @@
-angular.module('director', [ 'scene', 'dreamScenes', 'threeView', 'controls'])
+angular.module('director', [ 'scene', 'dream.scenes', 'dream.objects', 'dream.events', 'threeView', 'three.helpers', 'controls'])
 
-    // TODO: necessary? coordinator service for cameras/views and scenes?
     .factory('director.Director', ['$rootScope', function($rootScope) {
-        var Director = function Director(viewName, view) {
+        var Director = function Director(view) {
             this.views = {};
             this.controls = {};
+            this.gameEvents = [];
             this.clock = new THREE.Clock();
-            this.addView(viewName, view);
+            this.addView(view);
             this.tick = angular.bind(this, this.tick);
 
             this.registerEvents();
@@ -41,6 +41,17 @@ angular.module('director', [ 'scene', 'dreamScenes', 'threeView', 'controls'])
             return controls;
         };
 
+        // TODO: refactor to each individual scene for its own geometry.
+        Director.prototype.addGameEvent = function addGameEvent(fn, timeout, isInterval) {
+            this.gameEvents.push(fn);
+        };
+
+        Director.prototype.updateGameEvents = function updateGameEvents() {
+            for (var event in this.gameEvents) {
+                this.gameEvents[event].apply(this, arguments);
+            }
+        };
+
         Director.prototype.registerEvents = function registerEvents() {
             // listen for any render events to animate associated scene
             $rootScope.$on('render', this.tick);
@@ -58,18 +69,18 @@ angular.module('director', [ 'scene', 'dreamScenes', 'threeView', 'controls'])
         };
 
         Director.prototype.tick = function tick(event, view) {
-            // stats.update();
-            // TODO: need multiple calls as execution time changes?
             var delta = this.clock.getDelta();
 
             // animate the view's associated scene and camera
+            // TODO: refactor to track scenes, also
             if (this.views[view.name] && this.views[view.name].sceneCoordinator) {
-                this.views[view.name].sceneCoordinator.animate();
+                this.updateGameEvents(view.name);
+                this.views[view.name].sceneCoordinator.animate(this.views[view.name].renderer, this.clock);
                 if (this.controls[view.name]) this.controls[view.name].update(delta);
             }
         };
 
-        // add support for both vernaculars
+        // support for both vernaculars
         Director.prototype.update = Director.prototype.tick;
 
         // TODO: figure out purpose of this.  services are confusing me a bit here,
@@ -83,14 +94,62 @@ angular.module('director', [ 'scene', 'dreamScenes', 'threeView', 'controls'])
         return Director;
     }])
 
-    .factory('director.DreamDirector', ['director.Director', function(Director) {
-        var DreamDirector = function DreamDirector() {
+    .factory('director.DreamDirector', [
+      '$rootScope',
+      'director.Director',
+      'dream.objects.makeDreamAtom',
+      'three.helpers.makeRandomVector',
+      function($rootScope, Director, makeDreamAtom, makeRandomVector) {
+        function DreamDirector() {
+            Director.call(this);
             return this;
         };
 
         DreamDirector.prototype = Object.create(Director.prototype);
 
+        DreamDirector.prototype.malleable = {};
+
+        // TODO: if ever do collision detection, change to bounding sphere
+        DreamDirector.prototype.addCheckDreamProximity = function(dream) {
+            this.addGameEvent(angular.bind(this, function(view) {
+                view = this.views[view];
+                // as close as 50 gl_units, enter the dream
+                if (view.camera.position.distanceTo(dream.position) < 200) {
+                    $rootScope.$broadcast('dreamProximity', dream);
+                }
+            }));
+        };
+
+        DreamDirector.prototype.makeDreamsFor = function(dreams, view) {
+            var sceneCoordinator = view.sceneCoordinator;
+            var coordClamp = {
+                x: 5000,
+                y: 3000,
+                z: 5000
+            };
+            for (var i in dreams) {
+                var dreamAtom = makeDreamAtom(0, 0, 0, sceneCoordinator.getScene(), view.camera);
+                dreamAtom.position = makeRandomVector(coordClamp, view.camera.position);
+                dreamAtom.meta.title = dreams[i];
+                this.addCheckDreamProximity(dreamAtom);
+                sceneCoordinator.add(dreamAtom);
+            }
+        };
+
         return DreamDirector;
+    }])
+
+    .directive('dreamContent', [ '$rootScope', function($rootScope) {
+        return function(scope, element, attrs) {
+            scope.$on('dreamProximity', function(event, dream) {
+                if (!scope.content.show) {
+                    scope.content.show = true;
+                    scope.content.url = 'assets/dreams/' + dream.meta.title + '.html';
+                    scope.content.title = dream.meta.title;
+                    element.addClass('animate-slide');
+                }
+            });
+        };
     }])
 
     /**
@@ -101,13 +160,14 @@ angular.module('director', [ 'scene', 'dreamScenes', 'threeView', 'controls'])
       'director.Director',
       'director.DreamDirector',
       'threeView.ThreeView',
-      'dreamScenes.Circle',
+      'dream.scenes.Circle',
+      'dream.events.makeRainBoxes',
       'controls.DragPan',
       'controls.FreeFloat',
       'effects.effects',
       '$timeout',
-      function(Director, DreamDirector, ThreeView, Circle, DragPan, FreeFloat, effects, $timeout) {
-        var dreamDirector = new Director();
+      function(Director, DreamDirector, ThreeView, Circle, makeRainBoxes, DragPan, FreeFloat, effects, $timeout) {
+        var dreamDirector = new DreamDirector();
 
         var circleSC = new Circle();
 
@@ -125,73 +185,26 @@ angular.module('director', [ 'scene', 'dreamScenes', 'threeView', 'controls'])
         controls.constrainVertical = true;
         controls.verticalMin = 1.1;
         controls.verticalMax = 2.2;
-        //controls.lookSpeed = 100;
 
-        // TODO: push starting positions into initialization
-        // method for the scene.
-        mainCamera.position.y = circleSC.getY( circleSC.worldHalfWidth, circleSC.worldHalfDepth ) * 100 + 100;
+        var stats = new Stats();
+        stats.domElement.style.position = 'absolute';
+        stats.domElement.style.bottom = '0px';
+        stats.domElement.style.right = '0px';
 
-        // var stats = new Stats();
-        // stats.domElement.style.position = 'absolute';
-        // stats.domElement.style.top = '0px';
-
-        // container.appendChild( stats.domElement );
-
+        //threeView.domElement.append(stats.domElement);
         threeView.renderer.setClearColorHex(0x000000, 1.0);
         threeView.renderer.clear();
 
-        effects.setScene( circleSC.getScene(), mainCamera );
-        addDream();
-
-
-        dreamDirector.addView('dream', threeView);
-
-        // add camera to the scene
         circleSC.add(mainCamera);
+        mainCamera.position.z = 300;
+        dreamDirector.malleable.rainCubeSize = { x: 50, y: 50, z: 50 };
 
-        // lock it like it's hot
-        // TODO: move to directive mayhaps?
-
-        //mainCamera.position.z = 300;
-
-        // TODO: find a place for stuff like this....
-        // create boxes every 3 seconds
-        var boxesPromise = setInterval(rainBoxes, 3000);
-        var camera = mainCamera;
-        var rainDistance = 1000;
-        var rainHeight = 500;
-        var maxLifeTime = 15;
-
-
-        function addDream() {
-            effects.addLensFlare( 0x33CDC7, 200, 0, 0 );
-            effects.addLensFlare( 0xFFFFFF, 0, 0, 0) ;
-        };
+        // create boxes every .5 seconds within a zone of mainCamera.position
+        var boxesPromise = makeRainBoxes(circleSC.getScene(), dreamDirector.malleable.rainCubeSize, mainCamera.position, 500);
 
         // TODO: find a better way to check the scene status
         // for whether we're animating or not, and store intervals
         // taking place.
-        function rainBoxes() {
-            var box = new Physijs.BoxMesh(
-                new THREE.CubeGeometry( 50, 50, 50 ),
-                new THREE.MeshBasicMaterial({
-                    color: 0xffffff,
-                    transparent: true,
-                    opacity: Math.random()
-                })
-            );
-
-            box.position = new THREE.Vector3();
-            box.position.x = Math.floor( (Math.random() * rainDistance) + camera.position.x);
-            box.position.y = Math.floor( (Math.random() * rainHeight) + camera.position.y);
-            box.position.z = Math.floor( (Math.random() * rainDistance) + camera.position.z);
-            circleSC.add(box);
-
-            // wait 15 seconds before making the box disappear
-            $timeout(function() {
-                circleSC.remove(box);
-            }, 15000);
-        };
 
         return dreamDirector;
     }])

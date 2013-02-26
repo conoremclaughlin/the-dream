@@ -1,5 +1,5 @@
 /**
- * credits to Michael Change and the Google Data Arts stars project for lensflare assets and
+ * credits to Michael Chang and the Google Data Arts stars project for lensflare assets and
  * some of the code.
  *
  * @see http://www.html5rocks.com/en/tutorials/casestudies/100000stars/
@@ -17,15 +17,15 @@ angular.module('effects', [])
             camera = c;
         };
 
-        effects.addLensFlare = function addLensFlare( rgb, x, y, z, overrideImage ) {
+        effects.addLensFlare = function addLensFlare( rgb, position, overrideImage ) {
             var size = 700;
             var textureFlare0 = overrideImage || THREE.ImageUtils.loadTexture( "assets/lensflare/lensflare0.png" );
             var textureFlare1 = THREE.ImageUtils.loadTexture( "assets/lensflare/lensflare1.png" );
             var textureFlare2 = THREE.ImageUtils.loadTexture( "assets/lensflare/lensflare2.png" );
-            var textureFlare3 = THREE.ImageUtils.loadTexture( "assets/lensflare/lensflare3.png" );
+            //var textureFlare3 = THREE.ImageUtils.loadTexture( "assets/lensflare/lensflare3.png" );
 
             var light = new THREE.PointLight( rgb, 1.5, 4500 );
-            light.position.set( x, y, z );
+            light.position = position;
 
             var flareColor = new THREE.Color( rgb );
             var lensFlare = new THREE.LensFlare( textureFlare0, 700, 0, THREE.AdditiveBlending, flareColor );
@@ -48,7 +48,9 @@ angular.module('effects', [])
             return lensFlare;
         };
 
-        // this function will operate over each lensflare artifact, moving them around the screen
+        /**
+         * this function will operate over each lensflare artifact, moving them around the screen
+         */
         effects.lensFlareUpdateCallback = function lensFlareUpdateCallback( object ) {
             var f, fl = this.lensFlares.length;
             var flare;
@@ -66,12 +68,12 @@ angular.module('effects', [])
                 flare.y = this.positionScreen.y + vecY * flare.distance;
 
                 // if scaleHorizon gl_units away, don't change the size of the flare
-                if (camDistance > scaleHorizon) {
-                    flare.scale = size / camDistance;
-                } else {
+                //if (camDistance > scaleHorizon) {
+                flare.scale = size / camDistance;
+                /*} else {
                     // else closer, grow it proportionately
                     flare.scale = size * 10 * (scaleHorizon / camDistance);
-                }
+                }*/
 
                 flare.rotation = 0;
             }
