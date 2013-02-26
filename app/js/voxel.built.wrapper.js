@@ -49085,8 +49085,6 @@ angular.module('voxel', [])
 
     .directive('voxelGame', ['voxel.game', function(game) {
         return function(scope, element, attrs) {
-            console.log('do we have a game? ', game);
-            console.log('do we have an element? ', element);
             game.appendTo(element[0]);
             game.setupPointerLock(element[0]);
         };

@@ -9,14 +9,15 @@ angular.module('dream.events', [ 'three.helpers', 'physijs' ])
           /**
            * Creates raining boxes at random points within a 3-dimensional zone.
            *
-           * @param scene to add boxes to
-           * @param position Vector3 for center of rainfall 'zone'
-           * @param interval between creating a new box
-           * @returns interval promise object to cancel the rainfall with.
+           * @param {Object} scene to add to
+           * @param {Object} size of the boxes to create
+           * @param {Vector3} position for center of rainfall 'zone'
+           *
+           * @returns {Function} meant to be used in an interval.
            */
-          function makeRainBoxes(scene, size, position, interval) {
+          function makeRainBoxes(scene, size, position) {
               function rain() {
-                  var MAX_LIFE_TIME = 15000;
+                  var MAX_LIFE_TIME = 15000
                   var coordClamp = {
                       x: 2000,
                       y: 1000,
@@ -33,11 +34,6 @@ angular.module('dream.events', [ 'three.helpers', 'physijs' ])
                   );
 
                   box.position = makeRandomVector(coordClamp, position);
-                  /*// debug
-                  console.log('box.position: ', box.position.x);
-                  console.log('box.position: ', box.position.y);
-                  console.log('box.position: ', box.position.z);
-                  */
                   scene.add(box);
 
                   // wait MAX_LIFE_TIME before removing box from scene
@@ -46,7 +42,8 @@ angular.module('dream.events', [ 'three.helpers', 'physijs' ])
                   }, MAX_LIFE_TIME);
               };
 
-              return setInterval(rain, interval);
+              // TODO: find a wrapper for director for these.
+              return rain;
           };
 
           return makeRainBoxes;

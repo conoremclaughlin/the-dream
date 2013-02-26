@@ -15,7 +15,7 @@ myApp.config(['$routeProvider', function($routeProvider) {
         $scope.threeView = dreamDirector.getView('main');
         $scope.content = {
             show: false,
-            url: '',
+            quote: '',
             title: ''
         };
         $scope.gui = {

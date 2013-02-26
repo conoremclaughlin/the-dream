@@ -75,7 +75,6 @@ angular.module('dream.objects', [ 'effects' ])
             });
 
             dreamAtom.update = function(renderer, scene, clock) {
-                //var time = Date.now();
                 var time = clock.getElapsedTime();
 
                 dreamAtom.rotation.x += rotationX;
@@ -87,7 +86,7 @@ angular.module('dream.objects', [ 'effects' ])
                 });
 
                 sphereTwo.visible = false;
-                //cubeCamera.updateCubeMap( renderer, scene );
+                // cubeCamera.updateCubeMap( renderer, scene );
                 sphereTwo.visible = true; // *cough*
             };
 

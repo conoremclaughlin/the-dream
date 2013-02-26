@@ -5,6 +5,7 @@ angular.module('director', [ 'scene', 'dream.scenes', 'dream.objects', 'dream.ev
             this.views = {};
             this.controls = {};
             this.gameEvents = [];
+            this.gameEventsDeferred = [];
             this.clock = new THREE.Clock();
             this.addView(view);
             this.tick = angular.bind(this, this.tick);
@@ -71,6 +72,10 @@ angular.module('director', [ 'scene', 'dream.scenes', 'dream.objects', 'dream.ev
         Director.prototype.tick = function tick(event, view) {
             var delta = this.clock.getDelta();
 
+            // TODO: find a better way to check the scene status
+            // for whether we're animating or not, and store intervals
+            // taking place.
+
             // animate the view's associated scene and camera
             // TODO: refactor to track scenes, also
             if (this.views[view.name] && this.views[view.name].sceneCoordinator) {
@@ -109,14 +114,33 @@ angular.module('director', [ 'scene', 'dream.scenes', 'dream.objects', 'dream.ev
 
         DreamDirector.prototype.malleable = {};
 
-        // TODO: if ever do collision detection, change to bounding sphere
+        /**
+         * TODO: if ever do collision detection, change to bounding sphere
+         * TODO: write clock class to defer event handling
+         * for a certain period of time after firing
+         */
         DreamDirector.prototype.addCheckDreamProximity = function(dream) {
+            var clock = new THREE.Clock(false);
             this.addGameEvent(angular.bind(this, function(view) {
                 view = this.views[view];
-                // as close as 50 gl_units, enter the dream
+
+                // if the event has already been broadcast within the last second,
+                // do nothing
+
+                if (clock.running) {
+                    if (clock.getElapsedTime() > 1) {
+                        clock.stop();
+                    } else {
+                        return false;
+                    }
+                }
+
+                // if within 200 gl_units, bring up the dream's data
                 if (view.camera.position.distanceTo(dream.position) < 200) {
+                    clock.start();
                     $rootScope.$broadcast('dreamProximity', dream);
                 }
+                return true;
             }));
         };
 
@@ -136,17 +160,48 @@ angular.module('director', [ 'scene', 'dream.scenes', 'dream.objects', 'dream.ev
             }
         };
 
+        /**
+         * Ghettofabulous custom setIntervals that should only be called while animating.
+         * TODO: find better way to manage animation intervals other than
+         * the slight equivalent of a spin-lock.
+         *
+         * @param fn
+         * @param interval
+         */
+        DreamDirector.prototype.setInterval = function(fn, interval) {
+            // THREE.Clock returns elapsed time in seconds, need to compensate
+            var start = this.clock.getElapsedTime()
+              , stop = 0
+              , interval = interval / 1000;
+
+            var event = angular.bind(this, function() {
+                stop = this.clock.getElapsedTime();
+                if ((stop - start) > interval) {
+                    start = stop;
+                    setTimeout(fn, 0); // add async call to JS event queue
+                }
+            });
+
+            this.addGameEvent(event);
+        };
+
         return DreamDirector;
     }])
 
-    .directive('dreamContent', [ '$rootScope', function($rootScope) {
+    .directive('dreamContent', [ '$rootScope', '$http', function($rootScope, $http) {
         return function(scope, element, attrs) {
             scope.$on('dreamProximity', function(event, dream) {
                 if (!scope.content.show) {
-                    scope.content.show = true;
-                    scope.content.url = 'assets/dreams/' + dream.meta.title + '.html';
-                    scope.content.title = dream.meta.title;
-                    element.addClass('animate-slide');
+                    $http.get('assets/dreams/' + dream.meta.title + '.html')
+                        .success(function(data, status, headers, config) {
+                            scope.content.show = true;
+                            scope.content.quote = data;
+                            scope.content.title = dream.meta.title;
+                            element.addClass('animate-slide');
+                         })
+                         .error(function(data, status, headers, config) {
+                             console.error('failed to read the ' + dream.meta.title + ' dream.');
+                         });
                 }
             });
         };
@@ -200,11 +255,8 @@ angular.module('director', [ 'scene', 'dream.scenes', 'dream.objects', 'dream.ev
         dreamDirector.malleable.rainCubeSize = { x: 50, y: 50, z: 50 };
 
         // create boxes every .5 seconds within a zone of mainCamera.position
-        var boxesPromise = makeRainBoxes(circleSC.getScene(), dreamDirector.malleable.rainCubeSize, mainCamera.position, 500);
-
-        // TODO: find a better way to check the scene status
-        // for whether we're animating or not, and store intervals
-        // taking place.
+        var rain = makeRainBoxes(circleSC.getScene(), dreamDirector.malleable.rainCubeSize, mainCamera.position);
+        dreamDirector.setInterval(rain, 500);
 
         return dreamDirector;
     }])
