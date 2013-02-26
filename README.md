@@ -8,6 +8,8 @@ stuff to do
 
 controls
 ---
+* click on the screen to lock the mouse cursor and move.
+* hit esc to escape pointer-lock
 * wasd - forward, back, left, right
 * rf - up, down
 * mouse/trackpad - look around
