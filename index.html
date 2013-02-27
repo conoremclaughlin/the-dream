@@ -1,1 +1,55 @@
-./app/index.html
+<!doctype html>
+<html lang="en" ng-app="MyApp">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>the dream</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="css/ratchet.css" media="screen" />
+  <link rel="stylesheet" href="css/bootstrap.min.css" />
+  <link rel="stylesheet" href="css/bootstrap-responsive.min.css" />
+  <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+  <div class="container-fluid">
+    <div class="row-fluid">
+      <nav id="dream-nav" class="sidebar span2 dream-nav">
+        <span><b>the dream</b></span>
+        <ul class="unstyled">
+          <li><a href="#/dream">enter</a></li>
+          <li><a href="#/pixelated">mine</a></li>
+          <li><a href="#/add">add</a></li>
+        </ul>
+      </nav>
+      <div class="offset2" ng-view></div>
+    </div>
+  </div>
+
+  <script src="js/vendor/jquery.min.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.4/angular.min.js"></script>
+  <script src="js/vendor/three.min.js"></script>
+  <script src="js/vendor/physi.js"></script>
+  <script src="js/vendor/dat.gui.min.js"></script>
+  <script src="js/vendor/stats.min.js"></script>
+  <script src="js/vendor/Detector.js"></script>
+  <script src="js/vendor/ImprovedNoise.js"></script>
+
+  <script src="js/three.helpers.js"></script>
+  <script src="js/effects.js"></script>
+  <script src="js/director.js"></script>
+  <script src="js/scene.js"></script>
+  <script src="js/controls.js"></script>
+  <script src="js/threeView.js"></script>
+  <script src="js/dream.objects.js"></script>
+  <script src="js/dream.events.js"></script>
+  <script src="js/dream.scenes.js"></script>
+  <script src="js/phsyi.wrapper.js"></script>
+  <script src="js/dat.gui.wrapper.js"></script>
+  <script src="js/voxel.built.wrapper.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/services.js"></script>
+  <script src="js/filters.js"></script>
+  <script src="js/directives.js"></script>
+</body>
+</html>
